@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guest link generator</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Josefin+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#151312;--fg:#EEE8DF;--dim:rgba(238,232,223,.6);--gold:#C9A25A;--line:rgba(201,162,90,.3);--card:rgba(255,255,255,.03)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;padding:clamp(24px,6vw,64px) clamp(16px,5vw,64px) 80px}
+main{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.k{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:11px;letter-spacing:.5em;text-transform:uppercase;color:var(--gold)}
+h1{font-weight:400;font-size:clamp(30px,6vw,48px);margin-top:8px}
+p.lead{color:var(--dim);font-style:italic}
+section{border:1px solid var(--line);background:var(--card);padding:clamp(18px,4vw,28px);display:flex;flex-direction:column;gap:14px}
+h2{font-weight:500;font-size:24px}
+label{display:flex;flex-direction:column;gap:6px;font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--dim)}
+input,select,textarea{font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;color:var(--fg);background:rgba(0,0,0,.35);border:1px solid var(--line);padding:11px 12px;outline:none;letter-spacing:0;text-transform:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+select option{background:#1a1715}
+textarea{min-height:140px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row > label{flex:1;min-width:200px}
+.chk{flex-direction:row;align-items:center;gap:8px;min-width:0!important;flex:none!important}
+.chk input{width:auto}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:999px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-family:'Josefin Sans',sans-serif;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn.solid{background:var(--gold);color:#1a140c}
+.btn:active{transform:scale(.97)}
+.out{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--fg);background:rgba(0,0,0,.35);border:1px dashed var(--line);padding:12px;word-break:break-all;min-height:46px}
+table{width:100%;border-collapse:collapse;font-size:16px}
+th{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--dim);text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid rgba(201,162,90,.12);vertical-align:middle}
+td .btn{padding:8px 12px;font-size:9.5px}
+td .lnk{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--dim);word-break:break-all}
+.note{font-size:15px;color:var(--dim);font-style:italic;line-height:1.5}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);padding:10px 18px;border-radius:999px;background:var(--gold);color:#1a140c;font-family:'Josefin Sans',sans-serif;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;opacity:0;transition:.3s;pointer-events:none}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:600px){table,thead,tbody,tr,td,th{display:block}thead{display:none}td{border:0;padding:4px 0}tr{border-bottom:1px solid rgba(201,162,90,.15);padding:10px 0}}
+</style></head><body>
+<main>
+  <header><p class="k">Nakhash &amp; Fathima Rana</p><h1>Guest link generator</h1>
+  <p class="lead">Each guest gets a link that greets them by name on the cover. Type a name, copy the link or send it straight on WhatsApp.</p></header>
+
+  <section>
+    <h2>Setup</h2>
+    <div class="row">
+      <label>Website address<input id="site" type="url" placeholder="https://your-site.vercel.app/"></label>
+      <label>Design<select id="design"><option value="index.html" selected>The invitation</option></select></label>
+    </div>
+    <p class="note">The address fills in automatically when this page is opened from the published site.</p>
+  </section>
+
+  <section>
+    <h2>One guest</h2>
+    <div class="row">
+      <label>Guest name<input id="name" type="text" placeholder="Mr. &amp; Mrs. Rasheed"></label>
+      <label class="chk"><input id="fam" type="checkbox" checked> &amp; family</label>
+    </div>
+    <div class="out" id="out">—</div>
+    <div class="row"><button class="btn solid" id="copy">Copy link</button><a class="btn" id="wa" href="#" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn" id="open">Preview</button></div>
+  </section>
+
+  <section>
+    <h2>Many guests</h2>
+    <label>One guest per line — optionally add a WhatsApp number after a comma<textarea id="bulk" placeholder="Mr. &amp; Mrs. Rasheed, 919876543210
+Dr. Salim &amp; family
+Fathima Aunty"></textarea></label>
+    <div class="row"><button class="btn solid" id="make">Make links</button><button class="btn" id="copyAll">Copy all as text</button></div>
+    <table id="tbl" hidden><thead><tr><th>Guest</th><th>Link</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+</main>
+<div id="toast"></div>
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const site=$('#site'),design=$('#design'),name=$('#name'),fam=$('#fam'),out=$('#out'),wa=$('#wa');
+  if(/^https?:/.test(location.protocol)) site.value=location.origin+location.pathname.replace(/[^\/]*$/,'');
+  const MSG=(n,link)=>'Assalamu Alaikum '+n+',\n\nYou are cordially invited to the wedding of A.M Nakhash & Fathima Rana on Sunday, 27 September 2026 from 11 AM to 3 PM, Rozia International Convention Centre, Kodangad, Kondotty.\n\nPlease open your invitation here:\n'+link+'\n\nYour presence will make our day more special.';
+  function base(){let b=site.value.trim();if(b&&!b.endsWith('/'))b+='/';return b;}
+  function link(n){return base()+design.value+(n?'?to='+encodeURIComponent(n):'');}
+  function full(n){return n+(fam.checked&&!/family/i.test(n)?' & family':'');}
+  function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+  function copy(t){return navigator.clipboard.writeText(t).then(()=>toast('Copied')).catch(()=>toast('Could not copy'));}
+  function refresh(){const n=name.value.trim();const l=n?link(full(n)):link('');out.textContent=l||'—';wa.href='https://wa.me/?text='+encodeURIComponent(MSG(n?full(n):'dear guest',l));}
+  [site,design,name,fam].forEach(el=>el.addEventListener('input',refresh));
+  $('#copy').onclick=()=>copy(out.textContent);
+  $('#open').onclick=()=>window.open(out.textContent,'_blank');
+  refresh();
+  $('#make').onclick=()=>{
+    const rows=$('#bulk').value.split('\n').map(x=>x.trim()).filter(Boolean);
+    const tb=$('#tbl tbody');tb.innerHTML='';
+    rows.forEach(r=>{const [n0,ph]=r.split(',').map(x=>x.trim());const n=full(n0);const l=link(n);
+      const tr=document.createElement('tr');
+      tr.innerHTML='<td>'+n+'</td><td><span class="lnk">'+l+'</span></td><td><div class="row"><button class="btn c">Copy</button><a class="btn" target="_blank" rel="noopener" href="https://wa.me/'+(ph?ph.replace(/\D/g,''):'')+'?text='+encodeURIComponent(MSG(n,l))+'">WhatsApp</a></div></td>';
+      tr.querySelector('.c').onclick=()=>copy(l);tb.appendChild(tr);});
+    $('#tbl').hidden=!rows.length;
+  };
+  $('#copyAll').onclick=()=>{const rows=[...document.querySelectorAll('#tbl tbody tr')].map(tr=>tr.children[0].textContent+' — '+tr.querySelector('.lnk').textContent);if(rows.length)copy(rows.join('\n'));else toast('Make links first');};
+})();
+</script>
+</body></html>

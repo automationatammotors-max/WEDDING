@@ -1,0 +1,15 @@
+{
+ "name": "Nakhash & Fathima Rana \u2014 Wedding",
+ "short_name": "Nakhash & Rana",
+ "start_url": "./",
+ "display": "standalone",
+ "background_color": "#14070b",
+ "theme_color": "#14070b",
+ "icons": [
+  {
+   "src": "icon.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ]
+}
