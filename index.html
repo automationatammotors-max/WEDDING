@@ -1156,8 +1156,10 @@ const sky=(function(){
   /* ---- film: frames/frame-001.jpg … loaded progressively, frame chosen by scroll position ---- */
   const FILM=V.frames||null;const film={imgs:[],loaded:0,cur:0};
   function loadFilm(){
+    /* coarse-to-fine: every 32nd frame first, then 16th, 8th… so the walk shows early on slow connections */
+    const order=[],seen=new Set();for(const st of [32,16,8,4,2,1])for(let i=0;i<FILM.count;i+=st)if(!seen.has(i)){seen.add(i);order.push(i);}
     let next=0,active=0;const hint=$('#hint'),base=hint.textContent;
-    const step=()=>{while(active<4&&next<FILM.count){const i=next++;const im=new Image();active++;
+    const step=()=>{while(active<4&&next<order.length){const i=order[next++];const im=new Image();active++;
       im.onload=im.onerror=()=>{active--;film.loaded++;film.imgs[i]=im.naturalWidth?im:null;
         if(film.loaded<FILM.count)hint.textContent='Loading film · '+Math.round(film.loaded/FILM.count*100)+'%';else hint.textContent=base;step();};
       im.src=FILM.dir+'/'+(FILM.prefix||'frame-')+String(i+1).padStart(FILM.pad||3,'0')+'.'+(FILM.ext||'jpg');}};
