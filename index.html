@@ -472,6 +472,8 @@ html.celestial .moon{display:block;position:absolute;top:clamp(56px,9vh,110px);r
   filter:drop-shadow(0 0 28px rgba(var(--accent-light-rgb),.5));opacity:0;transform:translateY(-18px);transition:opacity 2s var(--ease) 1.2s,transform 2s var(--ease) 1.2s}
 html.celestial body.open .moon{opacity:.92;transform:none}
 html.celestial .moon svg{display:block;width:100%;height:100%;overflow:visible}
+/* film mode: the footage carries the story, so the drawn couple and road are hidden */
+html.has-film #walk,html.has-film #road,html.has-film #skyline{display:none}
 /* beach scene: the aisle is drawn on the canvas, the couple wears white and cream */
 html.scene-beach #road,html.scene-beach #skyline,html.scene-beach #blooms{display:none}
 html.scene-beach #walk svg{fill:#FFFFFF;stroke:rgba(110,90,70,.38);stroke-width:.9;filter:drop-shadow(0 8px 16px rgba(80,60,40,.28))}
@@ -495,6 +497,15 @@ html.panel-glass .paper .tex{display:none}
 html.panel-glass .paper .bloom{opacity:.35}
 html.panel-glass .paper .rule{inset:6px}
 
+@media(max-height:560px){
+  #gate{place-items:start center;overflow-y:auto;padding-block:14px}
+  .g-content{gap:8px}
+  .seal{width:84px;animation:none}
+  .seal .mono{font-size:20px}
+  .g-names{font-size:16px;margin-top:0}
+  #openBtn{margin-top:6px;min-height:44px;padding-block:11px}
+  .g-hint{display:none}
+}
 @media(max-width:480px){
   #dock a,#dock button{min-width:64px;padding-inline:8px}
   #snd{width:42px;height:42px}
@@ -1140,6 +1151,26 @@ const sky=(function(){
     ctx.fillStyle=hz;ctx.fillRect(0,0,W,H);
     if(scene.p>0){ctx.fillStyle=`rgba(${BG},${(scene.p*.38).toFixed(3)})`;ctx.fillRect(0,0,W,H);}
   }
+  /* ---- film: frames/frame-001.jpg … loaded progressively, frame chosen by scroll position ---- */
+  const FILM=V.frames||null;const film={imgs:[],loaded:0,cur:0};
+  function loadFilm(){
+    let next=0,active=0;const hint=$('#hint'),base=hint.textContent;
+    const step=()=>{while(active<4&&next<FILM.count){const i=next++;const im=new Image();active++;
+      im.onload=im.onerror=()=>{active--;film.loaded++;film.imgs[i]=im.naturalWidth?im:null;
+        if(film.loaded<FILM.count)hint.textContent='Loading film · '+Math.round(film.loaded/FILM.count*100)+'%';else hint.textContent=base;step();};
+      im.src=FILM.dir+'/'+(FILM.prefix||'frame-')+String(i+1).padStart(FILM.pad||3,'0')+'.'+(FILM.ext||'jpg');}};
+    step();
+  }
+  function nearestFrame(idx){for(let d=0;d<FILM.count;d++){const a=film.imgs[idx-d];if(a)return a;const b=film.imgs[idx+d];if(b)return b;}return null;}
+  function filmFrame(){
+    const target=scene.p*(FILM.count-1);film.cur+=(target-film.cur)*.16;
+    const im=nearestFrame(Math.round(film.cur));
+    ctx.fillStyle=T('--bg');ctx.fillRect(0,0,W,H);
+    if(im){const k=Math.max(W/im.naturalWidth,H/im.naturalHeight),w=im.naturalWidth*k,h=im.naturalHeight*k;ctx.drawImage(im,(W-w)/2,(H-h)/2,w,h);}
+    ctx.fillStyle=`rgba(${BG},${FILM.veil==null?.18:FILM.veil})`;ctx.fillRect(0,0,W,H);
+  }
+  if(FILM)loadFilm();
+
   /* ---- illustrated beach: day turns to sunset as the couple walks the aisle ---- */
   const BEACH=V.scene==='beach';
   let ground=null,clouds=[],gPetals=[],hzSea=0,sandTop=0;
@@ -1227,8 +1258,8 @@ const sky=(function(){
   }
   let t=0;
   function frame(){
-    t++;if(BEACH)beachFrame(t);else background();
-    if(!BEACH)for(const b of bokeh){
+    t++;if(FILM)filmFrame();else if(BEACH)beachFrame(t);else background();
+    if(!BEACH&&!FILM)for(const b of bokeh){
       b.x+=b.vx;b.y+=b.vy;b.ph+=.006;
       if(b.y<-b.r*2){b.y=H+b.r*2;b.x=rnd(0,W);}
       if(b.x<-b.r*2)b.x=W+b.r;else if(b.x>W+b.r*2)b.x=-b.r;
@@ -1237,7 +1268,7 @@ const sky=(function(){
       g.addColorStop(0,`rgba(${BK},${a})`);g.addColorStop(.55,`rgba(${BK2},${a*.45})`);g.addColorStop(1,`rgba(${BK2},0)`);
       ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,6.283);ctx.fill();
     }
-    if(!BEACH)for(const d of dust){
+    if(!BEACH&&!FILM)for(const d of dust){
       const a=(.25+.45*Math.abs(Math.sin(t*.01*d.sp+d.ph)))*(.6+.8*scene.p);
       ctx.fillStyle=`rgba(${DU},${a})`;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,6.283);ctx.fill();
       d.y-=.08*d.sp;if(d.y<-4){d.y=H+4;d.x=rnd(0,W);}
