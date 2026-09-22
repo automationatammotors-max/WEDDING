@@ -817,7 +817,7 @@ const MOBILE=matchMedia('(max-width:760px)').matches;
 const scene={p:0};
 const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const $=s=>document.querySelector(s);
-const V={"ornament": "frame", "scene": "film", "frames": {"dir": "film", "count": 240, "veil": 0.34}, "lanterns": false, "skyline": false, "celestial": false};
+const V={"ornament": "frame", "scene": "film", "frames": {"dir": "film", "count": 480, "veil": 0.34}, "lanterns": false, "skyline": false, "celestial": false};
 /* colour tokens, read once from the theme block */
 const CS=getComputedStyle(document.documentElement);
 const T=n=>CS.getPropertyValue(n).trim();
@@ -1168,7 +1168,7 @@ const sky=(function(){
   }
   function nearestFrame(idx){for(let d=0;d<FILM.count;d++){const a=film.imgs[idx-d];if(a)return a;const b=film.imgs[idx+d];if(b)return b;}return null;}
   function filmFrame(){
-    const target=scene.p*(FILM.count-1);film.cur+=(target-film.cur)*.16;
+    const target=scene.p*(FILM.count-1);film.cur+=(target-film.cur)*.34;if(Math.abs(target-film.cur)<.5)film.cur=target;
     const im=nearestFrame(Math.round(film.cur));
     ctx.fillStyle=T('--bg');ctx.fillRect(0,0,W,H);
     if(im){const k=Math.max(W/im.naturalWidth,H/im.naturalHeight),w=im.naturalWidth*k,h=im.naturalHeight*k;ctx.drawImage(im,(W-w)/2,(H-h)/2,w,h);}
